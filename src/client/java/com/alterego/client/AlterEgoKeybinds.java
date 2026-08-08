@@ -50,7 +50,7 @@ public final class AlterEgoKeybinds {
 			return;
 		}
 		for (Ability ability : AbilityRegistry.abilitiesFor(ego.entityType())) {
-			if (ego.enabledAbilities().contains(ability.id())) {
+			if (!ability.passive() && ego.enabledAbilities().contains(ability.id())) {
 				ClientPlayNetworking.send(new UseAbilityPayload(ability.id()));
 				return;
 			}

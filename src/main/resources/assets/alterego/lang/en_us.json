@@ -10,5 +10,20 @@
 	"screen.alterego.abilities": "Abilities",
 	"screen.alterego.applied": "You are now a %s",
 	"screen.alterego.reverted": "You are yourself again",
-	"ability.alterego.explosion": "Explosion"
+	"ability.alterego.explosion": "Explosion",
+	"ability.alterego.teleport": "Teleport",
+	"ability.alterego.small_fireball": "Fireball",
+	"ability.alterego.large_fireball": "Ghast Fireball",
+	"ability.alterego.snowball": "Throw Snowball",
+	"ability.alterego.spit": "Spit",
+	"ability.alterego.wither_skull": "Wither Skull",
+	"ability.alterego.arrow_shot": "Bow & Infinite Arrows",
+	"ability.alterego.wall_climb": "Wall Climbing",
+	"ability.alterego.flight": "Flight",
+	"ability.alterego.fire_immunity": "Fire Immunity",
+	"ability.alterego.water_breathing": "Water Breathing",
+	"ability.alterego.no_fall_damage": "No Fall Damage",
+	"ability.alterego.jump_boost": "Strong Jump",
+	"ability.alterego.speed": "Swiftness",
+	"ability.alterego.strength": "Strength"
 }

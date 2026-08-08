@@ -1,5 +1,6 @@
 package com.alterego.client;
 
+import com.alterego.EgoSideHooks;
 import com.alterego.net.EgoSyncPayload;
 import com.alterego.net.FuseStartPayload;
 
@@ -12,6 +13,9 @@ public class AlterEgoClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		AlterEgoKeybinds.register();
+
+		// Lets the common wall-climb mixin see the client's synced ego state.
+		EgoSideHooks.clientEgoLookup = ClientEgoState::get;
 
 		ClientPlayNetworking.registerGlobalReceiver(EgoSyncPayload.TYPE,
 				(payload, context) -> ClientEgoState.set(payload.playerId(), payload.toSelection()));

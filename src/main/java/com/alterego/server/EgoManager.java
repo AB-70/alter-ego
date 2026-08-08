@@ -29,15 +29,28 @@ import net.minecraft.world.level.Level;
  */
 public final class EgoManager {
 	private static final int FUSE_TICKS = 30;
-	private static final int COOLDOWN_TICKS = 100;
 	private static final float EXPLOSION_POWER = 3.0F;
 
 	private static final Map<UUID, EgoSelection> EGOS = new HashMap<>();
 	/** Players currently "hissing": ticks left until their explosion goes off. */
 	private static final Map<UUID, Integer> FUSES = new HashMap<>();
-	private static final Map<UUID, Integer> COOLDOWNS = new HashMap<>();
+	/** Per-player, per-ability cooldown ticks remaining. */
+	private static final Map<UUID, Map<String, Integer>> COOLDOWNS = new HashMap<>();
 
 	private EgoManager() {
+	}
+
+	/** The player's current ego, or null if they are themself. */
+	public static EgoSelection get(UUID playerId) {
+		return EGOS.get(playerId);
+	}
+
+	/** Re-applies passives on a fresh ServerPlayer instance (respawn). */
+	public static void onRespawn(ServerPlayer player) {
+		EgoSelection ego = EGOS.get(player.getUUID());
+		if (ego != null) {
+			PassiveAbilities.refresh(player, ego);
+		}
 	}
 
 	public static void select(ServerPlayer player, EgoSelection requested) {
@@ -48,6 +61,7 @@ public final class EgoManager {
 		} else {
 			EGOS.put(player.getUUID(), selection);
 		}
+		PassiveAbilities.refresh(player, selection);
 		broadcast(server, EgoSyncPayload.of(player.getUUID(), selection));
 	}
 
@@ -70,20 +84,41 @@ public final class EgoManager {
 		if (ego == null || !ego.enabledAbilities().contains(abilityId)) {
 			return;
 		}
-		if (AbilityRegistry.EXPLOSION.id().equals(abilityId)) {
-			UUID id = player.getUUID();
-			if (FUSES.containsKey(id) || COOLDOWNS.containsKey(id)) {
+		Ability ability = null;
+		for (Ability candidate : AbilityRegistry.abilitiesFor(ego.entityType())) {
+			if (!candidate.passive() && candidate.id().equals(abilityId)) {
+				ability = candidate;
+				break;
+			}
+		}
+		if (ability == null) {
+			return;
+		}
+
+		UUID id = player.getUUID();
+		Map<String, Integer> cooldowns = COOLDOWNS.computeIfAbsent(id, k -> new HashMap<>());
+		if (cooldowns.containsKey(abilityId)) {
+			return;
+		}
+
+		if (ability == AbilityRegistry.EXPLOSION) {
+			if (FUSES.containsKey(id)) {
 				return;
 			}
 			player.level().playSound(null, player, SoundEvents.CREEPER_PRIMED, SoundSource.HOSTILE, 1.0F, 0.5F);
 			FUSES.put(id, FUSE_TICKS);
 			broadcast(player.level().getServer(), new FuseStartPayload(id, FUSE_TICKS));
+		} else if (ActiveAbilities.use(player, ability)) {
+			cooldowns.put(abilityId, ability.cooldownTicks());
 		}
 	}
 
 	public static void tick(MinecraftServer server) {
-		COOLDOWNS.replaceAll((id, ticks) -> ticks - 1);
-		COOLDOWNS.values().removeIf(ticks -> ticks <= 0);
+		for (Map<String, Integer> cooldowns : COOLDOWNS.values()) {
+			cooldowns.replaceAll((abilityId, ticks) -> ticks - 1);
+			cooldowns.values().removeIf(ticks -> ticks <= 0);
+		}
+		COOLDOWNS.values().removeIf(Map::isEmpty);
 
 		Iterator<Map.Entry<UUID, Integer>> it = FUSES.entrySet().iterator();
 		while (it.hasNext()) {
@@ -98,7 +133,15 @@ public final class EgoManager {
 			if (player != null && !player.isRemoved()) {
 				player.level().explode(player, player.getX(), player.getY(), player.getZ(),
 						EXPLOSION_POWER, Level.ExplosionInteraction.MOB);
-				COOLDOWNS.put(entry.getKey(), COOLDOWN_TICKS);
+				COOLDOWNS.computeIfAbsent(entry.getKey(), k -> new HashMap<>())
+						.put(AbilityRegistry.EXPLOSION.id(), AbilityRegistry.EXPLOSION.cooldownTicks());
+			}
+		}
+
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			EgoSelection ego = EGOS.get(player.getUUID());
+			if (ego != null) {
+				PassiveAbilities.tick(player, ego);
 			}
 		}
 	}
@@ -115,6 +158,7 @@ public final class EgoManager {
 		FUSES.remove(id);
 		COOLDOWNS.remove(id);
 		if (EGOS.remove(id) != null) {
+			PassiveAbilities.removeAll(player);
 			broadcast(player.level().getServer(), EgoSyncPayload.of(id, EgoSelection.SELF));
 		}
 	}
