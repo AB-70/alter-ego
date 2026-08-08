@@ -1,0 +1,13 @@
+{
+	"key.alterego.open": "Open AlterEgo Menu",
+	"key.categories.alterego": "AlterEgo",
+	"screen.alterego.title": "AlterEgo",
+	"screen.alterego.search": "Search entities...",
+	"screen.alterego.apply": "Apply",
+	"screen.alterego.revert": "Revert to Self",
+	"screen.alterego.show_nametag": "Show Nametag",
+	"screen.alterego.abilities": "Abilities",
+	"screen.alterego.applied": "You are now a %s",
+	"screen.alterego.reverted": "You are yourself again",
+	"ability.alterego.explosion": "Explosion"
+}
