@@ -5,10 +5,10 @@
 	"name": "AlterEgo",
 	"description": "Become any entity: swap your character model, optionally hide your nametag, and gain the abilities of the mob you embody.",
 	"authors": [
-		"AlterEgo Team"
+		"AB-70"
 	],
 	"contact": {},
-	"license": "CC0-1.0",
+	"license": "All Rights Reserved",
 	"icon": "assets/alterego/icon.png",
 	"environment": "*",
 	"entrypoints": {
