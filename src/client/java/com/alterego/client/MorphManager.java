@@ -12,7 +12,11 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntitySpawnRequest;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.item.BlockItem;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +27,12 @@ import org.jetbrains.annotations.Nullable;
  * player.
  */
 public final class MorphManager {
+	/** Only the humanoid slots — animal-only slots (body/saddle) reject items on many mobs. */
+	private static final EquipmentSlot[] HUMANOID_SLOTS = {
+			EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND,
+			EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+	};
+
 	private static final Map<UUID, LivingEntity> DUMMIES = new HashMap<>();
 	/**
 	 * Dummies need entity IDs (getId() throws unassigned) but must never clash
@@ -57,6 +67,7 @@ public final class MorphManager {
 		try {
 			if (type.create(player.level(), new EntitySpawnRequest(EntitySpawnReason.LOAD, true)) instanceof LivingEntity living) {
 				living.setId(nextDummyId--);
+				living.setSilent(true);
 				return living;
 			}
 		} catch (Exception e) {
@@ -97,6 +108,23 @@ public final class MorphManager {
 		dummy.attackAnim = player.attackAnim;
 		dummy.swinging = player.swinging;
 		dummy.hurtTime = player.hurtTime;
+
+		// Mirror equipment so humanoid morphs (skeleton, zombie...) visibly hold
+		// the player's items and wear their armor.
+		for (EquipmentSlot slot : HUMANOID_SLOTS) {
+			dummy.setItemSlot(slot, player.getItemBySlot(slot));
+		}
+		if (dummy instanceof Mob mob) {
+			// Drives attack/aiming poses, e.g. the skeleton's drawn-bow arms
+			// while the player charges a bow.
+			mob.setAggressive(player.isUsingItem());
+		}
+		if (dummy instanceof EnderMan enderMan) {
+			// Endermen render a carried block instead of a held item.
+			enderMan.setCarriedBlock(player.getMainHandItem().getItem() instanceof BlockItem blockItem
+					? blockItem.getBlock().defaultBlockState()
+					: null);
+		}
 
 		WalkAnimationStateAccessor from = (WalkAnimationStateAccessor) player.walkAnimation;
 		WalkAnimationStateAccessor to = (WalkAnimationStateAccessor) dummy.walkAnimation;
