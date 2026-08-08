@@ -1,6 +1,7 @@
 {
 	"key.alterego.open": "Open AlterEgo Menu",
-	"key.categories.alterego": "AlterEgo",
+	"key.alterego.ability": "Use Ability",
+	"key.category.alterego.main": "AlterEgo",
 	"screen.alterego.title": "AlterEgo",
 	"screen.alterego.search": "Search entities...",
 	"screen.alterego.apply": "Apply",

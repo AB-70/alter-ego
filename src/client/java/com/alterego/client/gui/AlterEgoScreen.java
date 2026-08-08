@@ -13,7 +13,10 @@ import com.alterego.EgoSelection;
 import com.alterego.ability.Ability;
 import com.alterego.ability.AbilityRegistry;
 import com.alterego.client.ClientEgoState;
+import com.alterego.net.SelectEgoPayload;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
@@ -21,6 +24,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -69,7 +73,8 @@ public class AlterEgoScreen extends Screen {
 
 	public AlterEgoScreen() {
 		super(Component.translatable("screen.alterego.title"));
-		EgoSelection current = ClientEgoState.current();
+		LocalPlayer player = Minecraft.getInstance().player;
+		EgoSelection current = player == null ? EgoSelection.SELF : ClientEgoState.get(player.getUUID());
 		this.selectedType = current.entityType();
 		this.showNametag = current.showNametag();
 		this.enabledAbilities.addAll(current.enabledAbilities());
@@ -185,9 +190,12 @@ public class AlterEgoScreen extends Screen {
 	}
 
 	private void apply() {
-		ClientEgoState.set(new EgoSelection(this.selectedType, this.showNametag, Set.copyOf(this.enabledAbilities)));
-		// TODO: send the selection to the server once the sync packet exists.
 		if (this.minecraft.player != null) {
+			EgoSelection selection = new EgoSelection(this.selectedType, this.showNametag, Set.copyOf(this.enabledAbilities));
+			// Optimistic local update; the server's sync broadcast is authoritative.
+			ClientEgoState.set(this.minecraft.player.getUUID(), selection);
+			ClientPlayNetworking.send(SelectEgoPayload.of(selection));
+
 			Component message = this.selectedType == null
 					? Component.translatable("screen.alterego.reverted")
 					: Component.translatable("screen.alterego.applied", this.selectedType.getDescription());
