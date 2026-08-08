@@ -1,0 +1,35 @@
+{
+	"schemaVersion": 1,
+	"id": "alterego",
+	"version": "${version}",
+	"name": "AlterEgo",
+	"description": "Become any entity: swap your character model, optionally hide your nametag, and gain the abilities of the mob you embody.",
+	"authors": [
+		"AlterEgo Team"
+	],
+	"contact": {},
+	"license": "CC0-1.0",
+	"icon": "assets/alterego/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.alterego.AlterEgo"
+		],
+		"client": [
+			"com.alterego.client.AlterEgoClient"
+		]
+	},
+	"mixins": [
+		"alterego.mixins.json",
+		{
+			"config": "alterego.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
