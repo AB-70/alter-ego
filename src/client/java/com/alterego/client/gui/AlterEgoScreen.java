@@ -57,8 +57,8 @@ public class AlterEgoScreen extends Screen {
 	private final List<EntityType<?>> allTypes = new ArrayList<>();
 	private final List<EntityType<?>> filteredTypes = new ArrayList<>();
 
-	/** Off by default until modded entities get ability/render support; remembered for the session. */
-	private static boolean showCustomEntities;
+	/** On by default now that supported mods have ability mappings; remembered for the session. */
+	private static boolean showCustomEntities = true;
 
 	@Nullable
 	private EntityType<?> selectedType;

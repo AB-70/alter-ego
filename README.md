@@ -5,7 +5,8 @@ A Fabric mod for **Minecraft 26.2** that lets you become any living entity. Your
 ## Features
 
 - **Morph into any living entity** — every living mob in the game is selectable (~80 types), with full animation mirroring: walking, sneaking, sprinting, head/body rotation, and limb swing all track your real movement.
-- **Fullscreen picker UI** (default key **G**): live 3D preview of the selected entity, searchable grid of all entities, per-ability toggles, and a nametag visibility option.
+- **Fullscreen picker UI** (default key **G**): live 3D preview of the selected entity, searchable grid of all entities, per-ability toggles, a nametag visibility option, and a toggle for showing/hiding modded entities.
+- **Third-party mod support**: modded entities are morphable too, with curated ability mappings for 13 popular creature mods (Friends&Foes, Mutant Monsters, BetterEnd/BetterNether, Nycto, and more — see [Custom entities](#custom-entities-third-party-mods)). No mod is a dependency.
 - **Ability system**: iconic mobs grant active abilities (fired with the ability key, default **V**) and/or passive abilities that apply continuously while morphed. Every ability can be individually disabled in the picker before applying.
 - **Multiplayer-ready**: transformations are server-authoritative and broadcast to all clients. Works in singleplayer, LAN, and dedicated servers. Late joiners see everyone's morphs correctly.
 - **Equipment mirroring**: humanoid morphs (skeleton, zombie, piglin...) visibly hold your items, draw bows when you do, and wear your armor. Endermen carry the block you're holding.
@@ -54,6 +55,30 @@ Both rebindable under Options → Controls → AlterEgo.
 | Strength (+8 melee damage) | Iron Golem, Ravager, Polar Bear, Warden |
 
 All other living entities are fully morphable cosmetically and simply grant no abilities (yet — adding one is a few lines in `AbilityRegistry` + `EgoManager`/`ActiveAbilities`).
+
+## Custom entities (third-party mods)
+
+Entities added by other installed mods appear in the picker alongside vanilla ones — every living modded entity is morphable with full animation mirroring. The **Show Custom Entities** checkbox in the picker (enabled by default) hides them if you want a vanilla-only grid.
+
+None of these mods are dependencies: ability mappings are keyed by registry name and are simply inert for mods you don't have installed. The following mods ship with curated ability mappings (~60 entities):
+
+| Mod | Ability highlights |
+|-----|--------------------|
+| Friends&Foes | Wildfire: Fireball + Fire Immunity · Glare: Flight · Crab: Water Breathing |
+| Illager Invasion | Firecaller: Fireball · Flying Magma: Flight + Fire Immunity · Surrendered: Flight |
+| Mutant Monsters | Mutant Creeper: Explosion + Strength · Mutant Enderman: Teleport + Strength · Mutant Skeleton: bow + Strength · Spider Pig: Wall Climbing |
+| Guard Villagers | Guard: Strength |
+| Promenade | Lush Creeper: Explosion · Sunken: Water Breathing · Duck: No Fall Damage |
+| MCA Reborn | Grim Reaper: Flight + Teleport |
+| BetterEnd | Dragonfly / Silk Moth: Flight · End Slime: Strong Jump · Cubozoa / End Fish: Water Breathing |
+| BetterNether | All mobs: Fire Immunity · flyers (Flying Pig, Hydrogen Jellyfish, Firefly, Skull): Flight · Jungle Skeleton: bow |
+| Ecologics | Coconut Crab: Strength + Water Breathing · Squirrel: Swiftness + No Fall Damage · Penguin: Water Breathing |
+| Fish of Thieves | All 10 fish: Water Breathing |
+| Wilder Wild | Crab: Wall Climbing + Water Breathing · Scorched: Wall Climbing + Fire Immunity · Butterfly / Firefly: Flight · Ostrich: Swiftness |
+| Variants&Ventures | Gelid / Verdant: bow · Murk: Water Breathing |
+| Nycto | Vampire: Swiftness + Strength · Dark Form: Flight + Swiftness · Hunter: bow |
+
+Entities from any other mod still show up and morph correctly — they just grant no abilities until a mapping is added (one `addModded(...)` line in `AbilityRegistry`).
 
 ## Requirements
 
