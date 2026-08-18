@@ -27,6 +27,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntitySpawnRequest;
@@ -55,6 +56,9 @@ public class AlterEgoScreen extends Screen {
 	private final Map<EntityType<?>, LivingEntity> previewCache = new HashMap<>();
 	private final List<EntityType<?>> allTypes = new ArrayList<>();
 	private final List<EntityType<?>> filteredTypes = new ArrayList<>();
+
+	/** Off by default until modded entities get ability/render support; remembered for the session. */
+	private static boolean showCustomEntities;
 
 	@Nullable
 	private EntityType<?> selectedType;
@@ -109,6 +113,17 @@ public class AlterEgoScreen extends Screen {
 				.onValueChange((box, value) -> this.showNametag = value)
 				.build());
 
+		Checkbox customBox = Checkbox.builder(Component.translatable("screen.alterego.show_custom"), this.font)
+				.pos(0, PREVIEW_TOP + 4)
+				.selected(showCustomEntities)
+				.onValueChange((box, value) -> {
+					showCustomEntities = value;
+					refilter();
+				})
+				.build();
+		customBox.setX(this.width - MARGIN - customBox.getWidth());
+		this.addRenderableWidget(customBox);
+
 		this.addRenderableWidget(Button.builder(Component.translatable("screen.alterego.apply"), b -> apply())
 				.bounds(this.width / 2 - 105, this.height - 30, 100, 20).build());
 		this.addRenderableWidget(Button.builder(Component.translatable("screen.alterego.revert"), b -> revert())
@@ -144,6 +159,9 @@ public class AlterEgoScreen extends Screen {
 		this.filteredTypes.clear();
 		String query = this.search.trim().toLowerCase(Locale.ROOT);
 		for (EntityType<?> type : this.allTypes) {
+			if (!showCustomEntities && !Identifier.DEFAULT_NAMESPACE.equals(EntityType.getKey(type).getNamespace())) {
+				continue;
+			}
 			if (query.isEmpty() || type.getDescription().getString().toLowerCase(Locale.ROOT).contains(query)) {
 				this.filteredTypes.add(type);
 			}
